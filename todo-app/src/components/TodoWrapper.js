@@ -4,6 +4,7 @@ import axios from "axios";
 import { TodoForm } from "./TodoForm";
 import { TodoList } from "./TodoList";
 import { EditTodoForm } from "./EditTodoForm";
+import { SearchForm } from "./SearchForm";
 
 import { v4 as uuidv4 } from "uuid";
 uuidv4();
@@ -11,12 +12,26 @@ uuidv4();
 export const TodoWrapper = () => {
   const [todos, setTodos] = useState([]);
   const [suggested, setSuggested] = useState();
+  const [mode, setMode] = useState("add");
+  const [searchResult, setSearchResult] = useState([]);
+
   const addTodo = (todo) => {
     setTodos([
       ...todos,
       { id: uuidv4(), task: todo, completed: false, isEditing: false },
     ]);
     getSuggestions();
+  };
+
+  const handleMode = (mode) => {
+    setMode(mode);
+  };
+
+  const searchTodo = (keyword) => {
+    if (!keyword) {
+      setSearchResult(todos);
+    }
+    setSearchResult(todos.filter((todo) => todo.task.includes(keyword)));
   };
 
   const toggleComplete = (id) => {
@@ -29,6 +44,7 @@ export const TodoWrapper = () => {
 
   const handleDelete = (id) => {
     setTodos(todos.filter((todo) => todo.id !== id));
+    handleMode('add')
   };
 
   const handleEdit = (id) => {
@@ -37,6 +53,7 @@ export const TodoWrapper = () => {
         todo.id === id ? { ...todo, isEditing: !todo.isEditing } : todo
       )
     );
+    handleMode('add')
   };
 
   const editTodo = (task, id) => {
@@ -46,7 +63,7 @@ export const TodoWrapper = () => {
       )
     );
     getSuggestions();
-  }
+  };
 
   const getSuggestions = async () => {
     try {
@@ -64,28 +81,51 @@ export const TodoWrapper = () => {
     getSuggestions();
   }, []);
 
+  useEffect(()=>{
+    setSearchResult(todos)
+    setMode('add')
+  },[todos])
+
   return (
     <div className="TodoWrapper">
       <h1>Here are some things to do!</h1>
-      <TodoForm addTodo={addTodo} />
+      {mode === "add" ? (
+        <TodoForm addTodo={addTodo} handleMode={handleMode} />
+      ) : (
+        <SearchForm searchTodo={searchTodo} handleMode={handleMode} />
+      )}
       <div className="Suggestion">
         {!suggested
           ? " "
           : `Got nothing to do? May I suggest you to ${suggested}?`}
       </div>
-      {todos.map((todo, i) =>
-        todo.isEditing ? (
-          <EditTodoForm editTodo={editTodo} task={todo} key={todo.id}/>
-        ) : (
-          <TodoList
-            task={todo}
-            key={i}
-            toggleComplete={toggleComplete}
-            handleDelete={handleDelete}
-            handleEdit={handleEdit}
-          />
-        )
-      )}
+      {mode === "add"
+        ? todos.map((todo, i) =>
+            todo.isEditing ? (
+              <EditTodoForm editTodo={editTodo} task={todo} key={todo.id} />
+            ) : (
+              <TodoList
+                task={todo}
+                key={i}
+                toggleComplete={toggleComplete}
+                handleDelete={handleDelete}
+                handleEdit={handleEdit}
+              />
+            )
+          )
+        : searchResult.map((todo, i) =>
+            todo.isEditing ? (
+              <EditTodoForm editTodo={editTodo} task={todo} key={todo.id} />
+            ) : (
+              <TodoList
+                task={todo}
+                key={i}
+                toggleComplete={toggleComplete}
+                handleDelete={handleDelete}
+                handleEdit={handleEdit}
+              />
+            )
+          )}
     </div>
   );
 };

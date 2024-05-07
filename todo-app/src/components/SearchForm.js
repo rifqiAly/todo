@@ -2,13 +2,12 @@ import React, { useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus, faMagnifyingGlass } from "@fortawesome/free-solid-svg-icons";
 
-export const TodoForm = ({ addTodo, handleMode }) => {
+export const SearchForm = ({ searchTodo, handleMode }) => {
   const [value, setValue] = useState("");
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    addTodo(value);
-    setValue("");
+    searchTodo(value);
   };
 
   return (
@@ -23,6 +22,25 @@ export const TodoForm = ({ addTodo, handleMode }) => {
       }}
     >
       <div>
+        <input
+          type="text"
+          className="todo-input"
+          placeholder="What are you looking for?"
+          value={value}
+          onChange={(e) => {
+            setValue(e.target.value);
+          }}
+        />
+        <button type="submit" className="todo-btn">
+          <FontAwesomeIcon
+            icon={faMagnifyingGlass}
+            style={{ cursor: "pointer" }}
+          />{" "}
+          Search
+        </button>
+      </div>
+
+      <div>
         <button
           type="button"
           style={{
@@ -34,27 +52,8 @@ export const TodoForm = ({ addTodo, handleMode }) => {
             cursor: "pointer",
             borderRadius: 50,
           }}
-          onClick={()=> handleMode('search')}
+          onClick={() => handleMode("add")}
         >
-          <FontAwesomeIcon
-            icon={faMagnifyingGlass}
-            style={{ cursor: "pointer" }}
-          />{" "}
-          Search
-        </button>
-      </div>
-      <div>
-        <input
-          type="text"
-          className="todo-input"
-          placeholder="What will you be doing?"
-          value={value}
-          required
-          onChange={(e) => {
-            setValue(e.target.value);
-          }}
-        />
-        <button type="submit" className="todo-btn">
           <FontAwesomeIcon icon={faPlus} style={{ cursor: "pointer" }} /> Add
         </button>
       </div>
